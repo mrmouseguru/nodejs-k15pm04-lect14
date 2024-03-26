@@ -45,7 +45,7 @@ myApi.get("/students", async (req, res) => {
   let search = req.query.q;
   if (search) {
     students = [];
-    for (let student of Object.values(STUDENTS)) {
+    for (let student of allStudents) {
       /* Check if the query is contained in each student's name */
       let name = `${student.givenName} ${student.surname}`.toLowerCase();
       if (name.includes(search.toLowerCase())) students.push(student);
@@ -83,9 +83,15 @@ myApi.patch("/students/:id", async (req, res) => {
 
 /*** This part was added after lecture ***/
 
-myApi.get("/students/:id/courses", (req, res) => {
+myApi.get("/students/:id/courses", async (req, res) => {
   let student = res.locals.student;
-  let courses = COURSES[student.id];
+  //let courses = COURSES[student.id];
+  let courses = [];
+  let data = await Enrollments.find({studentId : student.id}).toArray();
+
+  for(let doc of data){
+    courses.push({code : doc.code, units : doc.units});
+  }
   res.json({ courses: courses });
 });
 
